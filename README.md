@@ -1,6 +1,10 @@
-Data：data_test includes data for random problems (R),benchmark problems (mk,rdata and vdata) and complexity analysis,while data_dec includes data for all validation sets.
+Data：data_test.zip includes data for random problems (R), benchmark problems (mk,rdata and vdata) and complexity analysis experiments, while data_dec.zip includes data used for model evaluation.
 
-Scheduling rules： run main.py 
+Scheduling rules： Run the main.py file directly.
+
+SHL：Run the train.py file to train the model, then run the test.py file on the test set.
+
+GA：Run the main.py file directly.
 
 
 
