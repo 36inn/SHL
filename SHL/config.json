@@ -10,7 +10,7 @@
   "valid_paras": {
     "num_jobs": 10,
     "num_mas": 5,
-    "batch_size": 2,
+    "batch_size": 32,
     "ope_feat_dim" : 6,
     "ma_feat_dim" : 3
   },
