@@ -47,7 +47,7 @@
   "test_paras": {
     "num_ins": 10,
     "sample": true,
-    "num_sample": 20,
+    "num_sample": 100,
     "data_path": "P_mk"
   }
 }
