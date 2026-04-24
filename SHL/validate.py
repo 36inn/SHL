@@ -1,14 +1,11 @@
 import gym
 import PPO_model
 import torch
-import time
 import os
 import copy
 
 def get_validate_env(env_paras):
-    '''
-    Generate and return the validation environment from the validation set ()
-    '''
+
     file_path = "./data_dev/{0}{1}/".format(env_paras["num_jobs"], str.zfill(str(env_paras["num_mas"]),2))
     valid_data_files = os.listdir(file_path)
     for i in range(len(valid_data_files)):
@@ -19,7 +16,6 @@ def get_validate_env(env_paras):
 
 def validate(env_paras, env, model_policy):
 
-    start = time.time()
     memory = PPO_model.Memory()
     state = env.state
     done = False
@@ -33,5 +29,4 @@ def validate(env_paras, env, model_policy):
     makespan = copy.deepcopy(env.makespan_batch.mean())
     makespan_batch = copy.deepcopy(env.makespan_batch)
     env.reset()
-    print('validating time: ', time.time() - start, '\n')
     return makespan, makespan_batch

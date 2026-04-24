@@ -8,7 +8,6 @@ import gym
 import pandas as pd
 import torch
 import numpy as np
-
 import PPO_model
 from env.case_generator import CaseGenerator
 from validate import validate, get_validate_env
@@ -21,9 +20,7 @@ def setup_seed(seed):
     torch.backends.cudnn.deterministic = True
 
 def main():
-    # PyTorch initialization
-    # gpu_tracker = MemTracker()  # Used to monitor memory (of gpu)
-    setup_seed(3)
+    setup_seed(seed=0)
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     if device.type == 'cuda':
         torch.cuda.set_device(device)
@@ -34,7 +31,6 @@ def main():
     torch.set_printoptions(precision=None, threshold=np.inf, edgeitems=None, linewidth=None, profile=None, sci_mode=False)
     torch.set_num_threads(2)
 
-    # Load config and init objects
     with open("./config.json", 'r') as load_f:
         load_dict = json.load(load_f)
     env_paras = load_dict["env_paras"]
@@ -63,21 +59,13 @@ def main():
     valid_paras2["num_jobs"] = 20
     valid_paras2["num_mas"] = 10
     env_valid2 = get_validate_env(valid_paras2)
-    maxlen = 1  # Save the best model
+    maxlen = 1
     best_models = deque()
     makespan_best = float('inf')
 
-    # Use visdom to visualize the training process
-    '''
-    is_viz = train_paras["viz"]
-    if is_viz:
-        viz = Visdom(env=train_paras["viz_name"])
-    '''
-    # Generate data files and fill in the header
     str_time = time.strftime("%Y%m%d_%H%M%S", time.localtime(time.time()))
     save_path = './save/train_{0}'.format(str_time)
     os.makedirs(save_path)
-    # Training curve storage path (average of validation set)
     writer_ave = pd.ExcelWriter('{0}/training_ave_{1}.xlsx'.format(save_path, str_time))
     valid_results = []
     data_file = pd.DataFrame(np.arange(train_paras["save_timestep"], train_paras["save_timestep"]+train_paras["max_iterations"], train_paras["save_timestep"]), columns=["iterations"])
@@ -85,12 +73,9 @@ def main():
     writer_ave.save()
     writer_ave.close()
 
-
-    # Start training iteration
     start_time = time.time()
     env = None
     for i in range(1, train_paras["max_iterations"]+1):
-
         if (i - 1) % train_paras["parallel_iter"] == 0:
             if i<=200:
                 pass
@@ -108,16 +93,12 @@ def main():
             case = CaseGenerator(num_jobs, num_mas, opes_per_job_min, opes_per_job_max, nums_ope=nums_ope)
             env = gym.make('fjsp-v0', case=case, env_paras=env_paras)
             env.reset()
-            print('num_job: ', num_jobs, '\tnum_mas: ', num_mas, '\tnum_opes: ', sum(nums_ope))
-
-
-        # Get state and completion signal
+            #print('num_job: ', num_jobs, '\tnum_mas: ', num_mas, '\tnum_opes: ', sum(nums_ope))
         state = env.state
         done = False
         dones = env.done_batch
         last_time = time.time()
 
-        # Schedule in parallel
         while ~done:
             with torch.no_grad():
                 actions = model.policy_old.act(state, memories, dones)
@@ -125,31 +106,18 @@ def main():
             done = dones.all()
             memories.rewards.append(rewards)
             memories.is_terminals.append(dones)
-            # gpu_tracker.track()  # Used to monitor memory (of gpu)
-        print("spend_time: ", time.time()-last_time)
-
-
         env.reset()
 
-        # if iter mod x = 0 then update the policy
         if i % train_paras["update_timestep"] == 0:
             loss, reward = model.update(memories, env_paras, train_paras)
-            print("reward: ", '%.3f' % reward, "; loss: ", '%.3f' % loss)
             memories.clear_memory()
-
-        # if iter mod x = 0 then validate the policy
         if i % train_paras["save_timestep"] == 0 :
-            print('\nStart validating')
-            # Record the average results and the results on each instance
             vali_result, vali_result_100 = validate(valid_paras, env_valid, model.policy_old)
             vali_result1, _ = validate(valid_paras1, env_valid1, model.policy_old)
             vali_result2, _ = validate(valid_paras2, env_valid2, model.policy_old)
             vali_result=(vali_result+vali_result1+vali_result2)/3
-            print('valid_results:',i,vali_result)
             valid_results.append(vali_result.item())
 
-
-            # Save the best model
             if vali_result < makespan_best:
                 makespan_best = vali_result
                 if len(best_models) == maxlen:
@@ -159,7 +127,6 @@ def main():
                 best_models.append(save_file)
                 torch.save(model.policy.state_dict(), save_file)
 
-    # Save the data of training curve to files
     data = pd.DataFrame(np.array(valid_results).transpose(), columns=["res"])
     data.to_excel(writer_ave, sheet_name='Sheet1', index=False, startcol=1)
     writer_ave.save()

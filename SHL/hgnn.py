@@ -2,8 +2,7 @@ import torch
 from torch import nn
 from torch.nn import Identity
 import torch.nn.functional as F
-
-class GATedge(nn.Module):
+class GAT(nn.Module):
     def __init__(self,
                  in_feats,
                  out_feats,
@@ -13,13 +12,9 @@ class GATedge(nn.Module):
                  negative_slope=0.2,
                  residual=False,
                  activation=None):
-        '''
-        :param in_feats: tuple, input dimension of (operation node, machine node)
-        :param out_feats: Dimension of the output (machine embedding)
-        :param num_head: Number of heads
-        '''
-        super(GATedge, self).__init__()
-        self._num_heads = num_head  # single head is used in the actual experiment
+
+        super(GAT, self).__init__()
+        self._num_heads = num_head
         self._in_src_feats = in_feats[0]
         self._in_dst_feats = in_feats[1]
         self._out_feats = out_feats
@@ -76,14 +71,11 @@ class GATedge(nn.Module):
             feat_src = self.fc_src(h_src)
             feat_dst = self.fc_dst(h_dst)
         else:
-            # Deprecated in final experiment
             h_src = h_dst = self.feat_drop(feat)
             feat_src = feat_dst = self.fc(h_src).view(
                 -1, self._num_heads, self._out_feats)
         feat_edge = self.fc_edge(feat[2].unsqueeze(-1))
 
-
-        # Calculate attention coefficients
         el = (feat_src * self.attn_l).sum(dim=-1).unsqueeze(-1)
 
         er = (feat_dst * self.attn_r).sum(dim=-1).unsqueeze(-1)
@@ -93,7 +85,6 @@ class GATedge(nn.Module):
         eijk = self.leaky_relu(a)
         ekk = self.leaky_relu(er + er)
 
-        # Normalize
         mask = torch.cat((ope_ma_adj_batch[batch_idxes].unsqueeze(-1)==1,
                           torch.full(size=(ope_ma_adj_batch[batch_idxes].size(0), 1,
                                            ope_ma_adj_batch[batch_idxes].size(2), 1),
@@ -104,7 +95,6 @@ class GATedge(nn.Module):
         alpha_ijk = alpha[..., :-1, :]
         alpha_kk = alpha[..., -1, :].unsqueeze(-2)
 
-        # Calculate an return machine embedding
         Wmu_ijk = feat_edge + feat_src.unsqueeze(-2)
         a = Wmu_ijk * alpha_ijk.unsqueeze(-1)
         b = torch.sum(a, dim=-3)
