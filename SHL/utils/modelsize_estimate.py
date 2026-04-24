@@ -1,5 +1,3 @@
-# Used to monitor memory (of gpu)
-# https://github.com/Oldpan/Pytorch-Memory-Utils for reference
 
 import torch
 import torch.nn as nn
@@ -7,15 +5,12 @@ import numpy as np
 
 def modelsize(model, input, type_size=4):
     para = sum([np.prod(list(p.size())) for p in model.parameters()])
-    # print('Model {} : Number of params: {}'.format(model._get_name(), para))
     print('Model {} : params: {:4f}M'.format(model._get_name(), para * type_size / 1000 / 1000))
 
     input_ = input.clone()
     input_.requires_grad_(requires_grad=False)
-
     mods = list(model.modules())
     out_sizes = []
-
     for i in range(1, len(mods)):
         m = mods[i]
         if isinstance(m, nn.ReLU):
@@ -31,8 +26,6 @@ def modelsize(model, input, type_size=4):
         nums = np.prod(np.array(s))
         total_nums += nums
 
-    # print('Model {} : Number of intermedite variables without backward: {}'.format(model._get_name(), total_nums))
-    # print('Model {} : Number of intermedite variables with backward: {}'.format(model._get_name(), total_nums*2))
     print('Model {} : intermedite variables: {:3f} M (without backward)'
           .format(model._get_name(), total_nums * type_size / 1000 / 1000))
     print('Model {} : intermedite variables: {:3f} M (with backward)'
