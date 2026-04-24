@@ -1,5 +1,3 @@
-# Used to monitor memory (of gpu)
-# https://github.com/Oldpan/Pytorch-Memory-Utils for reference
 
 import gc
 import datetime
@@ -38,14 +36,6 @@ def get_mem_space(x):
     return ret
 
 class MemTracker(object):
-    """
-    Class used to track pytorch memory usage
-    Arguments:
-        detail(bool, default True): whether the function shows the detail gpu memory usage
-        path(str): where to save log file
-        verbose(bool, default False): whether show the trivial exception
-        device(int): GPU number, default is 0
-    """
     def __init__(self, detail=True, path='', verbose=False, device=0):
         print_detail = detail
         last_tensor_sizes = set()
@@ -83,9 +73,7 @@ class MemTracker(object):
             print(x.size(), x.dtype, np.prod(np.array(x.size()))*get_mem_space(x.dtype)/1024**2, file=file)
 
     def track(self):
-        """
-        Track the GPU memory usage
-        """
+
         frameinfo = inspect.stack()[1]
         where_str = frameinfo.filename + ' line ' + str(frameinfo.lineno) + ': ' + frameinfo.function
 
