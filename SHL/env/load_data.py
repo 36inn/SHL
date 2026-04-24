@@ -3,9 +3,6 @@ import numpy as np
 
 
 def load_fjs(lines, num_mas, num_opes):
-    '''
-    Load the local FJSP instance.
-    '''
     flag = 0
     matrix_proc_time = torch.zeros(
         size=(num_opes, num_mas))
@@ -13,8 +10,7 @@ def load_fjs(lines, num_mas, num_opes):
     matrix_cal_cumul = torch.zeros(size=(num_opes, num_opes)).int()
     nums_ope = []
     opes_appertain = np.array([])
-    num_ope_biases = []  # The id of the first operation of each job
-    # Parse data line by line
+    num_ope_biases = []  
     for line in lines:
         # first line
         if flag == 0:
@@ -46,9 +42,6 @@ def load_fjs(lines, num_mas, num_opes):
         torch.tensor(nums_ope).int(), matrix_cal_cumul,matrix_ope_ope_adj
 
 def nums_detec(lines):
-    '''
-    Count the number of jobs, machines and operations
-    '''
     num_opes = 0
     for i in range(1, len(lines)):
         num_opes += int(lines[i].strip().split()[0]) if lines[i] != "\n" else 0
@@ -59,21 +52,17 @@ def nums_detec(lines):
 
 
 def edge_detec(line, num_ope_bias, matrix_proc_time, matrix_pre_proc, matrix_cal_cumul):
-    '''
-    Detect information of a job
-    '''
     line_split = line.split()
     flag = 0
     flag_time = 0
     flag_new_ope = 1
     idx_ope = -1
-    num_ope = 0  # Store the number of operations of this job
+    num_ope = 0  
     num_option = np.array(
-        [])  # Store the number of processable machines for each operation of this job
+        [])  
     mac = 0
     for i in line_split:
         x = int(i)
-        # The first number indicates the number of operations of this job
         if flag == 0:
             num_ope = x
             flag += 1
@@ -90,12 +79,11 @@ def edge_detec(line, num_ope_bias, matrix_proc_time, matrix_pre_proc, matrix_cal
                 matrix_cal_cumul[:, idx_ope + num_ope_bias] = matrix_cal_cumul[:,
                                                               idx_ope + num_ope_bias - 1] + vector
             flag += 1
-        # not proc_time (machine)
+        
         elif flag_time == 0:
             mac = x - 1
             flag += 1
             flag_time = 1
-        # proc_time
         else:
             matrix_proc_time[idx_ope + num_ope_bias][mac] = x
             flag += 1
