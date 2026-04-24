@@ -1,4 +1,4 @@
-FJSP data：Random problems/ 1_Brandimarte/ 2_Hurink_vdata/ 3_Hurink_rdata
+FJSP data：Random problems
 Scheduling rules： run main.py
 
 Version：
