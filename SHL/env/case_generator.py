@@ -3,9 +3,7 @@ import time
 
 
 class CaseGenerator:
-    '''
-    FJSP instance generator
-    '''
+
     def __init__(self, job_init, num_mas, opes_per_job_min, opes_per_job_max, nums_ope=None, path='../data/',
                  flag_same_opes=True, flag_doc=False):
         if nums_ope is None:
@@ -13,13 +11,13 @@ class CaseGenerator:
         self.flag_doc = flag_doc  # Whether save the instance to a file
         self.flag_same_opes = flag_same_opes
         self.nums_ope = nums_ope
-        self.path = path  # Instance save path (relative path)
+        self.path = path  
         self.job_init = job_init
         self.num_mas = num_mas
 
-        self.mas_per_ope_min =1  #1 # The minimum number of machines that can process an operation
+        self.mas_per_ope_min =1  #1 
         self.mas_per_ope_max =num_mas
-        self.opes_per_job_min = opes_per_job_min  # The minimum number of operations for a job
+        self.opes_per_job_min = opes_per_job_min  
         self.opes_per_job_max = opes_per_job_max
         self.proctime_per_ope_min = 1  # Minimum average processing time
         self.proctime_per_ope_max = 20
