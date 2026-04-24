@@ -9,8 +9,6 @@ def main():
     num_jobs = 10
     num_mas = 10
     num=10
-    #opes_per_job_min = int(num_mas * 0.8)
-    #opes_per_job_max = int(num_mas * 1.2)
     opes_per_job_min =int(num * 0.8)
     opes_per_job_max =int(num * 1.2)
     with open("../config.json", 'r') as load_f:
